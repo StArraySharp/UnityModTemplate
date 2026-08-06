@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageType>Template</PackageType>
+    <PackageId>StArraySharp.ADOFAIUnityModTemplate</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>StArraySharp</Authors>
+    <Description>dotnet new template for ADOFAI Unity mods.</Description>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="**/*" />
+    <Content Include="**/*" Exclude=".git/**;bin/**;obj/**;artifacts/**;ADOFAIModTemplate.Template.csproj;New-ADOFAIMod.ps1" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

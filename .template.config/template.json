@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "StArraySharp",
+  "classifications": [
+    "ADOFAI",
+    "Unity",
+    "Game Modding"
+  ],
+  "identity": "StArraySharp.ADOFAIUnityModTemplate",
+  "name": "ADOFAI UnityMod",
+  "shortName": "adofaimod",
+  "sourceName": "ADOFAIUnityMod",
+  "preferNameDirectory": true,
+  "symbols": {
+    "gamePath": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "__GAME_EXE_PATH__",
+      "displayName": "ADOFAI executable path",
+      "description": "Full path to the installed ADOFAI executable.",
+      "replaces": "__GAME_EXE_PATH__"
+    },
+    "author": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "Your Name",
+      "displayName": "Mod author",
+      "replaces": "__MOD_AUTHOR__"
+    },
+    "description": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "ADOFAI Mod",
+      "displayName": "Mod description",
+      "replaces": "__MOD_DESCRIPTION__"
+    },
+    "version": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "1.0.0",
+      "displayName": "Mod version",
+      "replaces": "__MOD_VERSION__"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "rename": {
+            "ADOFAI.Template.local.txt.template": "ADOFAI.Template.local.txt"
+          },
+          "exclude": [
+            ".git/**",
+            ".template.config/**",
+            "ADOFAIModTemplate.Template.csproj",
+            "New-ADOFAIMod.ps1",
+            "artifacts/**",
+            "TemplatePack/**"
+          ]
+        }
+      ]
+    }
+  ]
+}

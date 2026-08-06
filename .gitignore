@@ -23,8 +23,10 @@ AssetStoreTools/
 ExportedObj/
 .consulo/
 *.csproj
+!ADOFAIModTemplate.Template.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -63,6 +65,16 @@ crashlytics-build.properties
 
 # ThunderKit specific
 ThunderKit/
+Assets/ThunderKitSettings/Logs/
+Packages/A Dance of Fire and Ice/
+
+# Template-local and packaging-only files
+ProjectSettings/ADOFAI.Template.local.txt
+*.nupkg
+artifacts/
+TemplatePack/bin/
+TemplatePack/obj/
+bin/
 
 # OS generated files
 .DS_Store

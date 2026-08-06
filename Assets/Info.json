@@ -1,0 +1,13 @@
+{
+  "Id": "ADOFAIUnityMod",
+  "DisplayName": "ADOFAIUnityMod",
+  "Description": "__MOD_DESCRIPTION__",
+  "Author": "__MOD_AUTHOR__",
+  "Version": "__MOD_VERSION__",
+  "ManagerVersion": "0.27.0",
+  "Requirements": [],
+  "AssemblyName": "ADOFAIUnityMod.dll",
+  "EntryMethod": "ADOFAIUnityMod.Main.Load",
+  "HomePage": "",
+  "Repository": ""
+}

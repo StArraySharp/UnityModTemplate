@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json.schemastore.org/dotnetcli.host",
+  "symbolInfo": {
+    "gamePath": {
+      "longName": "game-path",
+      "shortName": "g"
+    },
+    "author": {
+      "longName": "author-name",
+      "shortName": ""
+    },
+    "description": {
+      "longName": "description",
+      "shortName": ""
+    },
+    "version": {
+      "longName": "version",
+      "shortName": ""
+    }
+  }
+}
