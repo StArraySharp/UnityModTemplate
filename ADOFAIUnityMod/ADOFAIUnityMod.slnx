@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="ModAssembly.csproj" />
+  <Project Path="NewAssembly.csproj" />
+</Solution>
