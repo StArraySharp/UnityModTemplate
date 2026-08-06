@@ -88,6 +88,25 @@ Assets/
 
 模板不携带示例场景、示例资源或 Hello World 逻辑。`Main.cs` 负责 Mod 生命周期，`Patches.cs` 是 Harmony 补丁入口，`ResourceLoader.cs` 负责两个 AssetBundle 的加载和释放。
 
+## 模板脚本怎么分工
+
+生成项目后，通常按下面的方式使用这些文件：
+
+| 文件 | 作用 |
+| --- | --- |
+| `Main.cs` | UnityModManager 入口，负责启用/禁用 Mod、应用补丁和加载资源 |
+| `ModSettings.cs` | 添加 UnityModManager 设置字段和设置界面 |
+| `Patches.cs` | 编写 Harmony 补丁，修改游戏行为 |
+| `ResourceLoader.cs` | 加载和释放 ThunderKit 生成的 `scenes.assets`、`resources.assets` |
+| `TemplateBootstrap.cs` | 第一次打开 Unity 时自动配置 ThunderKit；只在编辑器中运行 |
+| `BuildMod.cs` | 执行 ThunderKit 构建，并把 Mod 文件复制到游戏的 `Mods` 目录 |
+| `<ProjectName>.asmdef` | 指定程序集名称、命名空间和游戏 DLL 引用 |
+| `Info.json` | 告诉 UnityModManager Mod 的名称、版本、DLL 和入口方法 |
+
+启用 Mod 时的基本流程是：`Main.Load` 注册生命周期回调，用户启用 Mod 后由 `Main` 调用 Harmony 应用补丁，再由 `ResourceLoader` 加载资源包；禁用时撤销补丁并释放资源。模板故意不提供示例补丁、示例设置或示例资源。
+
+脚本的完整说明、代码示例和资源加载方式见 [模板脚本与资源使用](docs/GettingStarted.md#6-模板脚本与资源使用)。
+
 ## 构建
 
 Unity 完成 ThunderKit 导入后，在菜单中打开 `Tools > Build Mod`。选择 ThunderKit Pipeline 和输出目录，然后点击 `Build Mod`。默认输出目录是 ADOFAI 安装目录下的 `Mods/<ProjectName>/`。

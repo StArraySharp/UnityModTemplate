@@ -139,7 +139,196 @@ Assets/
 
 Unity 打开项目后会自动生成 `.slnx`、`.csproj`、`Library`、`Temp` 等编辑器文件；这些不属于模板源代码，也已经被 `.gitignore` 排除。
 
-## 6. 添加 Harmony 补丁
+## 6. 模板脚本与资源使用
+
+模板自带的脚本是一套最小 Mod 骨架，不包含示例场景、示例按钮或 Hello World 逻辑。你可以按下面的职责理解它们：
+
+### 6.1 `Main.cs`：Mod 入口和生命周期
+
+文件位于 `Assets/Scripts/Main.cs`。`Info.json` 中的 `EntryMethod` 指向 `Main.Load`，因此 UnityModManager 加载 Mod 时会先调用这个方法。
+
+`Main.Load` 会：
+
+1. 保存 UnityModManager 提供的 Mod 信息和日志对象。
+2. 读取 `ModSettings.cs` 中的设置。
+3. 注册启用、禁用和设置界面的回调。
+4. 创建一个属于当前 Mod 的 Harmony 实例。
+
+用户启用 Mod 时，`Main` 会执行：
+
+```text
+Harmony.PatchAll()        扫描并应用当前程序集中的 Harmony 补丁
+ResourceLoader.LoadAll()  加载 scenes.assets 和 resources.assets
+```
+
+如果资源包加载失败，模板会自动撤销刚才应用的补丁，并让 UnityModManager 认为启用失败。用户禁用 Mod 时，模板会撤销当前 Mod 的补丁并释放资源。
+
+一般情况下，不需要修改 `Main.cs`。只有在 Mod 启用或禁用时需要创建、销毁自己的对象，或者需要执行额外初始化时，才在这里增加逻辑。
+
+### 6.2 `ModSettings.cs`：Mod 设置
+
+文件位于 `Assets/Scripts/ModSettings.cs`。这里的 `Settings` 类表示 UnityModManager 中这个 Mod 的设置，不是 ADOFAI 游戏的全局设置。
+
+模板当前没有任何设置字段，所以 UnityModManager 中不会显示示例选项。需要设置时，可以添加字段并在 `OnGUI` 中绘制：
+
+```csharp
+using UnityEngine;
+using UnityModManagerNet;
+
+namespace MyCoolMod
+{
+    public sealed class Settings : UnityModManager.ModSettings
+    {
+        public bool EnableFeature = true;
+
+        public void OnGUI(UnityModManager.ModEntry modEntry)
+        {
+            EnableFeature = GUILayout.Toggle(
+                EnableFeature,
+                "Enable feature");
+        }
+
+        public void OnSaveGUI(UnityModManager.ModEntry modEntry)
+        {
+            Save(modEntry);
+        }
+
+        public override void Save(UnityModManager.ModEntry modEntry)
+        {
+            Save(this, modEntry);
+        }
+
+        public static Settings Load(UnityModManager.ModEntry modEntry)
+        {
+            return Load<Settings>(modEntry);
+        }
+    }
+}
+```
+
+`OnGUI` 负责显示控件，`OnSaveGUI` 负责保存，`Load` 负责下次启动时读取。`Main.Load` 已经自动调用 `Settings.Load`，不需要你手动读取设置。
+
+### 6.3 `Patches.cs`：Harmony 补丁
+
+文件位于 `Assets/Scripts/Patches.cs`。当前的 `Patches` 类只是一个空的提示文件，真正的补丁可以写在这里，也可以放到其他 `.cs` 文件中。
+
+例如，下面的补丁会在目标方法执行前运行：
+
+```csharp
+using HarmonyLib;
+
+namespace MyCoolMod
+{
+    [HarmonyPatch(typeof(SomeGameType), nameof(SomeGameType.SomeMethod))]
+    internal static class SomeMethodPatch
+    {
+        private static void Prefix()
+        {
+            // 在游戏方法执行前运行
+        }
+    }
+}
+```
+
+`Main.cs` 中的 `Harmony.PatchAll` 会扫描整个 Mod 程序集，因此不需要手动注册这个补丁。补丁目标类型必须来自 ThunderKit 导入的 ADOFAI 游戏程序集。
+
+### 6.4 `ResourceLoader.cs`：AssetBundle 资源管理
+
+文件位于 `Assets/Scripts/ResourceLoader.cs`。它负责读取 ThunderKit 构建出的两个文件：
+
+```text
+scenes.assets
+resources.assets
+```
+
+`Assets/Resources/` 是 Unity 工程中的资源目录，最终由 ThunderKit 打包成 `resources.assets`；它不是 Mod 发布后可以直接访问的源代码目录。`ResourceLoader` 使用 AssetBundle 从 Mod 安装目录读取打包后的资源。
+
+它提供四个主要方法：
+
+| 方法 | 用途 |
+| --- | --- |
+| `LoadAll(modPath)` | 加载 Mod 目录下的两个资源包；任意一个失败都会返回 `false` |
+| `LoadAsset<T>(assetName)` | 从 `resources.assets` 加载 Prefab、Texture、AudioClip 等资源 |
+| `GetScenePaths()` | 获取 `scenes.assets` 中包含的场景路径 |
+| `UnloadAll()` | Mod 禁用时关闭资源包并释放资源 |
+
+加载 Prefab、图片和音频的例子：
+
+```csharp
+GameObject panel = ResourceLoader.LoadAsset<GameObject>("MyPanel");
+Texture2D icon = ResourceLoader.LoadAsset<Texture2D>("Icon");
+AudioClip sound = ResourceLoader.LoadAsset<AudioClip>("ClickSound");
+```
+
+资源名称区分大小写，必须与资源打包后的名称一致。如果返回 `null`，请先检查资源是否放在正确目录、ThunderKit 是否重新构建，以及传入的名称是否正确。
+
+场景不能用 `LoadAsset<GameObject>` 加载，而应该先取得场景路径，再交给 Unity 的场景管理器：
+
+```csharp
+using UnityEngine.SceneManagement;
+
+string[] scenePaths = ResourceLoader.GetScenePaths();
+if (scenePaths.Length > 0)
+{
+    SceneManager.LoadScene(
+        scenePaths[0],
+        LoadSceneMode.Additive);
+}
+```
+
+模板会在 Mod 启用时自动调用 `LoadAll`，在 Mod 禁用时自动调用 `UnloadAll`。因此普通 Mod 不需要手动调用这两个方法。只有在你需要延迟加载、重新加载或自定义资源生命周期时，才需要直接使用它们。
+
+当前模板要求构建结果同时包含两个资源包，即使 Mod 暂时没有资源。如果以后要制作纯代码 Mod，需要同时调整 `ResourceLoader` 和构建窗口的文件检查逻辑。
+
+### 6.5 `<ProjectName>.asmdef`：程序集定义
+
+文件位于 `Assets/Scripts/`，生成项目后会和项目同名，例如 `Creplay.asmdef`。
+
+它决定：
+
+- Mod DLL 的名称。
+- C# 默认命名空间。
+- 需要引用哪些 ADOFAI 和 UnityModManager DLL。
+- ThunderKit 导入完成前是否允许编译 Mod 代码。
+
+其中 `ADOFAI_GAME_IMPORTED` 约束表示只有 ThunderKit 导入 `Assembly-CSharp.dll` 后，Mod 程序集才会启用编译。不要把游戏 DLL 手动复制到项目中。
+
+### 6.6 `Info.json`：UnityModManager 清单
+
+文件位于 `Assets/Info.json`。它告诉 UnityModManager：
+
+- Mod 的 ID 和显示名称。
+- 作者、描述和版本。
+- 最终 DLL 的名称。
+- 启动入口方法。
+
+例如生成 `Creplay` 项目后，入口会是：
+
+```json
+"AssemblyName": "Creplay.dll",
+"EntryMethod": "Creplay.Main.Load"
+```
+
+项目创建参数会自动写入这些字段。通常不需要手动修改 DLL 名称或入口方法。
+
+### 6.7 编辑器脚本
+
+`Assets/Editor/TemplateBootstrap.cs` 和 `Assets/Editor/BuildMod.cs` 只在 Unity 编辑器中运行，不会进入最终 Mod DLL。
+
+`TemplateBootstrap.cs` 负责首次打开工程时读取游戏 exe、配置 ThunderKit、打开 Settings，并在 Import 完成后允许 Mod 程序集编译。更换游戏安装位置后，可以执行 `Tools > ADOFAI > Reset Template Bootstrap` 重新配置。
+
+`BuildMod.cs` 对应菜单 `Tools > Build Mod`。它执行选中的 ThunderKit Pipeline，检查 DLL 和两个资源包是否生成，然后把下面四个文件复制到 `Mods/<ProjectName>/`：
+
+```text
+<ProjectName>.dll
+Info.json
+scenes.assets
+resources.assets
+```
+
+它不会复制 ADOFAI 游戏 DLL，也不会自动启动游戏。
+
+## 7. 添加 Harmony 补丁
 
 在 `Assets/Scripts/Patches.cs` 或其他脚本中添加补丁。例如：
 
@@ -161,7 +350,7 @@ namespace MyCoolMod
 
 `Main.cs` 在 Mod 启用时执行当前程序集的 `PatchAll`，禁用时只撤销本 Mod 使用的 Harmony 补丁。
 
-## 7. 添加资源
+## 8. 添加资源
 
 - Unity 场景放到 `Assets/Scenes/`。它们会进入 `scenes.assets`。
 - Prefab 放到 `Assets/Resources/Prefabs/`。
@@ -176,7 +365,7 @@ namespace MyCoolMod
 
 `Assets/Resources/` 下的内容会进入 `resources.assets`。代码通过 `ResourceLoader.LoadAsset<T>(assetName)` 访问资源；模板不预设任何资源名称。
 
-## 8. 构建和部署
+## 9. 构建和部署
 
 1. 确认 ThunderKit 已经导入本机游戏包。
 2. 在 Unity 中打开 `Tools > Build Mod`。
@@ -195,7 +384,7 @@ resources.assets
 
 构建失败会同时写入 Unity Console 并弹出错误窗口。窗口不会复制 ADOFAI 游戏 DLL，也不会启动游戏。
 
-## 9. 常见错误
+## 10. 常见错误
 
 ### 游戏路径错误
 
@@ -229,6 +418,6 @@ ThunderKit/AssetBundleStaging/resources.assets
 
 如果缺少其中任何一个文件，构建窗口会停止并显示具体缺失项。
 
-## 10. 为什么不能提交游戏 DLL
+## 11. 为什么不能提交游戏 DLL
 
 游戏 DLL 属于本机安装内容，会随着游戏版本、平台和安装位置变化。提交它们会让模板变大、绑定某台机器的游戏版本，并可能造成许可证和分发问题。ThunderKit 已经负责从用户自己的 ADOFAI 安装生成 Unity 可用的游戏包，所以模板只保留引用声明和导入配置。
