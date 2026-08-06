@@ -13,12 +13,22 @@
 - 已安装 ADOFAI、UnityModManager 和 Git
 - 工程会通过 Packages 配置获取 ThunderKit
 
-在模板仓库目录执行：
+如果已经克隆了模板仓库，在仓库目录执行：
 
 ```powershell
 dotnet new install .
 dotnet new list
 ```
+
+其他人可以从 GitHub 获取模板后安装：
+
+```powershell
+git clone https://github.com/StArraySharp/ADOFAI-UnityModTemplate.git
+dotnet new install .\ADOFAI-UnityModTemplate
+dotnet new list
+```
+
+`dotnet new install` 不能直接把 GitHub URL 当作模板包；也可以下载发布的 `.nupkg` 后直接安装。
 
 然后创建 Mod：
 

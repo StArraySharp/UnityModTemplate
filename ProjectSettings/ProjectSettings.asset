@@ -865,23 +865,23 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Android: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    EmbeddedLinux: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    GameCoreScarlett: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    GameCoreXboxOne: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    Kepler: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    LinuxHeadlessSimulation: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    Nintendo Switch: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    Nintendo Switch 2: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    PS4: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    PS5: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    QNX: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    Stadia: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    Standalone: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    VisionOS: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    WebGL: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    XboxOne: ADANCEOFFIREANDICE;TK_ADDRESSABLE
-    tvOS: ADANCEOFFIREANDICE;TK_ADDRESSABLE
+    Android:
+    EmbeddedLinux:
+    GameCoreScarlett:
+    GameCoreXboxOne:
+    Kepler:
+    LinuxHeadlessSimulation:
+    Nintendo Switch:
+    Nintendo Switch 2:
+    PS4:
+    PS5:
+    QNX:
+    Stadia:
+    Standalone:
+    VisionOS:
+    WebGL:
+    XboxOne:
+    tvOS:
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

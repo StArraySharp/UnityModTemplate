@@ -14,7 +14,7 @@ ThunderKit 由 `Packages/manifest.json` 声明。第一次打开工程时，Unit
 
 ## 2. 安装模板
 
-在模板仓库根目录执行：
+如果已经克隆了模板仓库，在模板仓库根目录执行：
 
 ```powershell
 dotnet new install .
@@ -22,6 +22,16 @@ dotnet new list
 ```
 
 列表中应出现 `adofaimod`。
+
+其他人可以先从 GitHub 克隆模板，再执行同样的安装命令：
+
+```powershell
+git clone https://github.com/StArraySharp/ADOFAI-UnityModTemplate.git
+dotnet new install .\ADOFAI-UnityModTemplate
+dotnet new list
+```
+
+`.NET` 模板安装命令不能直接把 GitHub URL 当作模板包；如果发布了 `.nupkg`，也可以下载后直接安装。
 
 发布包也可以安装：
 

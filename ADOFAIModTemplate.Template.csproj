@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <Compile Remove="**/*" />
-    <Content Include="**/*" Exclude=".git/**;bin/**;obj/**;artifacts/**;ADOFAIModTemplate.Template.csproj;New-ADOFAIMod.ps1" />
+    <Content Include="**/*" Exclude=".git/**;Library/**;Temp/**;Logs/**;UserSettings/**;ThunderKit/**;Packages/A Dance of Fire and Ice/**;ProjectSettings/ADOFAI.Template.local.json;ProjectSettings/ADOFAI.Template.local.txt;bin/**;obj/**;artifacts/**;ADOFAIModTemplate.Template.csproj;New-ADOFAIMod.ps1;*.nupkg" />
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
-#if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -15,11 +15,19 @@ namespace ADOFAIUnityMod.Editor
     {
         private const string LocalConfigurationFile = "ProjectSettings/ADOFAI.Template.local.txt";
         private const string ThunderKitSettingsAsset = "Assets/ThunderKitSettings/ThunderKitSettings.asset";
-        private const string GamePathPlaceholder = "__GAME_EXE_PATH__";
+        private const string GamePathPlaceholder = "__GAME_EXE_" + "PATH__";
+        private const string GamePackageDirectory = "Packages/A Dance of Fire and Ice";
+        private const string GameAssemblyDefine = "ADOFAI_GAME_IMPORTED";
 
         static TemplateBootstrap()
         {
-            EditorApplication.delayCall += Initialize;
+            EditorApplication.delayCall += OnEditorReady;
+        }
+
+        private static void OnEditorReady()
+        {
+            Initialize();
+            StartGamePackageWatch();
         }
 
         [MenuItem("Tools/ADOFAI/Reset Template Bootstrap")]
@@ -107,6 +115,83 @@ namespace ADOFAIUnityMod.Editor
             EditorUtility.DisplayDialog("ADOFAI Mod Template", message, "OK");
         }
 
+        private static void StartGamePackageWatch()
+        {
+            if (HasGameAssemblyDefine())
+            {
+                return;
+            }
+
+            EditorApplication.update -= WaitForGamePackageImport;
+            EditorApplication.update += WaitForGamePackageImport;
+        }
+
+        private static void WaitForGamePackageImport()
+        {
+            if (!IsGamePackageImported())
+            {
+                return;
+            }
+
+            EditorApplication.update -= WaitForGamePackageImport;
+            AddGameAssemblyDefine();
+            Debug.Log("ADOFAI game assemblies detected. Runtime Mod assembly compilation has been enabled.");
+        }
+
+        private static bool IsGamePackageImported()
+        {
+            string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+            string packageDirectory = Path.Combine(projectRoot, GamePackageDirectory);
+            if (!Directory.Exists(packageDirectory))
+            {
+                return false;
+            }
+
+            return Directory.GetFiles(packageDirectory, "Assembly-CSharp.dll", SearchOption.AllDirectories).Length > 0;
+        }
+
+        private static bool HasGameAssemblyDefine()
+        {
+            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
+            return ContainsDefine(defines, GameAssemblyDefine);
+        }
+
+        private static void AddGameAssemblyDefine()
+        {
+            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
+            if (ContainsDefine(defines, GameAssemblyDefine))
+            {
+                return;
+            }
+
+            var symbols = new List<string>();
+            foreach (string symbol in defines.Split(';'))
+            {
+                if (!string.IsNullOrWhiteSpace(symbol) && !symbols.Contains(symbol))
+                {
+                    symbols.Add(symbol);
+                }
+            }
+
+            symbols.Add(GameAssemblyDefine);
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(
+                BuildTargetGroup.Standalone,
+                string.Join(";", symbols));
+        }
+
+        private static bool ContainsDefine(string defines, string expected)
+        {
+            foreach (string symbol in defines.Split(';'))
+            {
+                if (string.Equals(symbol.Trim(), expected, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static string GetInitializationPreferenceKey()
         {
             string projectRoot = Directory.GetParent(Application.dataPath).FullName;
@@ -120,4 +205,3 @@ namespace ADOFAIUnityMod.Editor
         }
     }
 }
-#endif

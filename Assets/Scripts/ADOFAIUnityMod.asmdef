@@ -19,7 +19,9 @@
         "Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "ADOFAI_GAME_IMPORTED"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }
